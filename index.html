@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Thanh Toán Tiện Ích - AppStash Store</title>
+  <style>
+    :root {
+      --primary-color: #0066ff;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #1e293b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .checkout-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      box-sizing: border-box;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h2 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      color: var(--text-color);
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #475569;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+      background-color: #fff;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+    }
+
+    .qr-box {
+      margin-top: 24px;
+      padding: 20px;
+      background-color: #f1f5f9;
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+    }
+
+    .qr-box img {
+      max-width: 230px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .qr-instruction {
+      font-size: 13px;
+      color: #334155;
+      margin-top: 12px;
+      line-height: 1.5;
+      text-align: left;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .price-tag {
+      font-weight: bold;
+      color: #059669;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="checkout-card">
+    <div class="header">
+      <span class="badge">VietQR Thanh Toán Tự Động</span>
+      <h2>Nâng Cấp Bản PRO</h2>
+      <p>Kích hoạt License Key qua Email sau khi chuyển khoản</p>
+    </div>
+
+    <!-- Danh sách Ứng dụng -->
+    <div class="form-group">
+      <label for="app-select">Sản phẩm nâng cấp</label>
+      <select id="app-select" onchange="generateQR()">
+        <option value="PROMPTSTASH" data-price="100000">PromptStash Pro - 100.000đ</option>
+        <!-- Thêm sản phẩm mới ở đây trong tương lai: -->
+        <!-- <option value="APP2" data-price="100000">App #2 Pro - 100.000đ</option> -->
+      </select>
+    </div>
+
+    <!-- Nhập Email -->
+    <div class="form-group">
+      <label for="user-email">Email nhận License Key (*)</label>
+      <input type="email" id="user-email" placeholder="ví dụ: tenban@gmail.com" oninput="generateQR()" required>
+    </div>
+
+    <!-- Khung hiển thị Mã VietQR -->
+    <div id="qr-box" class="qr-box">
+      <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 14px; color: #0f172a;">
+        Quét mã bằng App Ngân hàng / MoMo
+      </p>
+      
+      <img id="qr-img" src="" alt="Mã VietQR Thanh toán VietinBank">
+      
+      <div class="qr-instruction">
+        👉 <strong>Số tiền:</strong> <span class="price-tag">100.000 VNĐ</span><br>
+        👉 <strong>Ngân hàng:</strong> VietinBank (105886274873)<br>
+        ⚠️ <strong>Lưu ý:</strong> Giữ nguyên <strong>Nội dung chuyển khoản</strong> mặc định khi quét mã để hệ thống tự động trả Key về Email.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === CẤU HÌNH THÔNG TIN NGÂN HÀNG ===
+    const BANK_NAME = "VietinBank";   // Ngân hàng TMCP Công Thương Việt Nam
+    const ACCOUNT_NO = "105886274873"; // Số tài khoản nhận tiền
+
+    // Tự động chọn App theo tham số ?app= trên URL (ví dụ: ?app=promptstash)
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const appParam = urlParams.get('app');
+
+      if (appParam) {
+        const selectElem = document.getElementById('app-select');
+        const options = selectElem.options;
+        
+        for (let i = 0; i < options.length; i++) {
+          if (options[i].value.toLowerCase() === appParam.toLowerCase()) {
+            selectElem.selectedIndex = i;
+            break;
+          }
+        }
+      }
+    });
+
+    // Hàm tạo mã VietQR động
+    function generateQR() {
+      const selectElem = document.getElementById('app-select');
+      const selectedOption = selectElem.options[selectElem.selectedIndex];
+      const appCode = selectElem.value;
+      const price = selectedOption.getAttribute('data-price');
+      const email = document.getElementById('user-email').value.trim();
+      const qrBox = document.getElementById('qr-box');
+
+      // Kiểm tra cấu trúc Email cơ bản trước khi tạo mã QR
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        qrBox.style.display = 'none';
+        return;
+      }
+
+      // Cú pháp nội dung chuyển khoản gửi tới SePay: [MÃ_APP] [EMAIL]
+      // Ví dụ: PROMPTSTASH nguyenvana@gmail.com
+      const memo = `${appCode} ${email}`;
+
+      // Gọi API VietQR SePay
+      const qrUrl = `https://qr.sepay.vn/img?bank=${BANK_NAME}&acc=${ACCOUNT_NO}&amount=${price}&des=${encodeURIComponent(memo)}`;
+
+      document.getElementById('qr-img').src = qrUrl;
+      qrBox.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
