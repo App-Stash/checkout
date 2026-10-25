@@ -208,9 +208,9 @@
         return;
       }
 
-      // Cú pháp nội dung chuyển khoản gửi tới SePay: [MÃ_APP] [EMAIL]
+      // Cú pháp nội dung chuyển khoản gửi tới SePay: SEVQR [MÃ_APP] [EMAIL]
       // Ví dụ: PROMPTSTASH nguyenvana@gmail.com
-      const memo = `${appCode} ${email}`;
+      const memo = `SEVQR ${appCode} ${email}`;
 
       // Gọi API VietQR SePay
       const qrUrl = `https://qr.sepay.vn/img?bank=${BANK_NAME}&acc=${ACCOUNT_NO}&amount=${price}&des=${encodeURIComponent(memo)}`;
